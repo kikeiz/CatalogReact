@@ -1,0 +1,53 @@
+.border{
+    border: rgb(196,186,167) solid 3px;
+    border-radius: 3px;
+    background-color: rgb(237,234,228);
+    display: grid;
+    justify-content: center;
+    width: 350px;
+    margin: 30px;
+}
+
+.title{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
+
+.wrap{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+
+.name{
+    font-size: 30px;
+    display: flex;
+    justify-content: center;
+    color: rrgb(64,56,43);
+}
+
+.author{
+    font-size: 15px;
+}
+
+img{
+    max-width: 300px;
+    max-height: 300px;
+}
+
+article .img{
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn{
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+Button{
+    width: 100%;
+}
