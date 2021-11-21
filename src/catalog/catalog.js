@@ -4,7 +4,7 @@ import './catalog.scss'
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { v4 as uuidv4 } from 'uuid';
-
+import * as fs from 'fs' 
 
 //LIBRARY
 
@@ -78,7 +78,7 @@ export const Catalog = () =>{
           }
         </div>
       </section>
-    : <FormComponent setShowForm = {setShowForm} setBooks = {setBooks}/>
+    : <FormComponent setShowForm = {setShowForm} setBooks = {setBooks} books = {books}/>
   )
 }
 
@@ -90,8 +90,8 @@ const goToBuyPage = (id) => {
 
 
 
-const FormComponent = ({setShowForm, setBooks}) =>{
-  const [book, setBook] = React.useState({title: "", author: "", image: "", mark: "-"})
+const FormComponent = ({setShowForm, setBooks, books}) =>{
+  const [book, setBook] = React.useState({title: "", author: "", image: "", mark: ""})
 
   const handleChange = (e) =>{
     const name = e.target.name
@@ -108,6 +108,7 @@ const FormComponent = ({setShowForm, setBooks}) =>{
     setBooks((books)=>{
       return [...books, book];
     })
+
     setBook({title: "", author: "", image: "", mark: "-"});
 
     setShowForm(false)
@@ -144,6 +145,16 @@ const FormComponent = ({setShowForm, setBooks}) =>{
                   type="text" 
                   name="image"
                   value={book.image}
+                  onChange={handleChange}
+                />
+            </div>
+            <div className="p-field">
+                <label htmlFor="mark"><b>Mark</b></label>
+                <InputText 
+                  id="mark" 
+                  type="text" 
+                  name="mark"
+                  value={book.mark}
                   onChange={handleChange}
                 />
             </div>
