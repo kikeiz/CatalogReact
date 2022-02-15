@@ -1,85 +1,85 @@
 //Importamos React 
-import React from 'react';
+import React, { useState, useReducer, useEffect, useRef, useContext } from 'react';
 import './catalog.scss'
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
-import { v4 as uuidv4 } from 'uuid';
-import * as fs from 'fs' 
+import {CatalogApi} from '../../services/api.service'
+import { Toast } from 'primereact/toast';
+import { ConfirmDialog } from 'primereact/confirmdialog'; // To use <ConfirmDialog> tag
+import { reducer } from './catalog.reducer';
+
 
 //LIBRARY
 
-// const books = [
-//   {
-//     id: 1,
-//     title: 'El viento',
-//     author: 'Maria de Molina',
-//     img: 'https://imagessl2.casadellibro.com/a/l/t0/52/9788499086552.jpg',
-//     mark: 7
-//   },
-//   {
-//     id: 2,
-//     title: 'La margarita',
-//     author: 'Penelope Cruz',
-//     img: 'https://fotos-bb2b.s3.eu-west-3.amazonaws.com/wp-content/uploads/2021/09/07015318/portada-de-libros-famosos.jpg',
-//     mark: 8
 
-//   },
-//   {
-//     id: 3,
-//     title: 'Harry Potter',
-//     author: 'Keira Knightly',
-//     img: 'https://wl-genial.cf.tsp.li/resize/728x/jpg/ba3/e72/337d485c37af5cf13264ff037c.jpg',
-//     mark: 9
+const defaultState = {
+    books: [],
+    action: null, 
+    statusOk: true,
+    idToDelete: 0,
+    task: false
+}
 
-//   },
-//   {
-//     id: 4,
-//     title: 'El Molino',
-//     author: 'Gerard Depardieu',
-//     img: 'https://media.revistaad.es/photos/60c227359ae22619e08751b2/master/w_1600%2Cc_limit/247747.jpg',
-//     mark: 6
+const CatalogContext = React.createContext()
 
-//   },
-//   {
-//     id: 5,
-//     title: 'Todo o nada',
-//     author: 'Robert de Niro',
-//     img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMoEsPeKXDPFoQqYxOzjCSkJce7JMmO7_EJQ&usqp=CAU',
-//     mark: 7
+const deleteBook = async (id) =>{
+  const deleted = await CatalogApi.deleteBook(id)
+  .catch((err)=>{
+    console.log(7, err);
+  })
+  console.log(66, deleted);
 
-//   },
-//   {
-//     id: 6,
-//     title: 'Las Manzanas',
-//     author: 'Elsa Pataky',
-//     img: 'https://d1csarkz8obe9u.cloudfront.net/posterpreviews/romantic-novel-cover-design-template-1f302ee20814ee9513506d90de228af7_screen.jpg?ts=1588747771',
-//     mark: 8
-//   }
-// ]
-
+}
 
 export const Catalog = () =>{
-  const [showForm, setShowForm] = React.useState(false)
-  const [books, setBooks] = React.useState([])
+  const [showForm, setShowForm] = useState(false)
+  const [dialogVisible, setDialogVisible] = useState(false)
+  const toast = useRef(Toast)
+  const [state, dispatch] = useReducer(reducer, defaultState)
+  
+  useEffect(()=>{
+    (async function () {
+      let books = await CatalogApi.retrieveBooks()
+      if(books.length === 0)
+        return dispatch({type: 'FIRST_FAIL'})
 
-  return (
-    !showForm ?
+      dispatch({type: 'FIRST_OK', payload: books})
+    })();
+  }, [])
+
+
+  useEffect(()=>{
+    if(state.action){
+      toast.current?.show(
+        {
+          severity: state.statusOk ? 'success' : 'warning', 
+          summary: 'ADDITION', 
+          detail: state.statusOk ? `Book ${state.action} successfully`: `Error ${state.action.slice(0, -2)}ing book`
+        }
+      );
+    }
+    
+  }, [state.task])
+
+  return <CatalogContext.Provider value = {{setShowForm, dispatch, setDialogVisible}}>
+      <ConfirmDialog visible={dialogVisible} onHide={() => setDialogVisible(false)} message="Are you sure you want to delete the book?" header="Confirmation" icon="pi pi-exclamation-triangle" accept={async ()=> {dispatch({type: "DELETE", payload: await deleteBook(state.idToDelete)}); setDialogVisible(false)}} reject={()=> setDialogVisible(false)} />
+      <Toast ref={toast} />
       <section>
         <div className="center">
-          <Button onClick={()=>setShowForm(true)} label="Create Item" className="p-button-raised p-button-rounded p-button-warning"/>
+          <Button onClick={()=> setShowForm(!showForm ? true : false)} label={!showForm ? 'Create Item' : 'Cancel'} className="p-button-raised p-button-rounded p-button-warning"/>
         </div>
+        {showForm && <FormComponent/>}
         <div className="wrap">
           {
-            books.map((_book)=>{
+            state.books  && state.books.map((_book)=>{
               return (
-                <Book key = {_book.id} {..._book}/>
+                <Book key = {_book._id}  {..._book}/>
               )
             })
           }
         </div>
       </section>
-    : <FormComponent setShowForm = {setShowForm} setBooks = {setBooks} books = {books}/>
-  )
+  </CatalogContext.Provider>
 }
 
 
@@ -90,28 +90,33 @@ const goToBuyPage = (id) => {
 
 
 
-const FormComponent = ({setShowForm, setBooks, books}) =>{
+const FormComponent = () =>{
   const [book, setBook] = React.useState({title: "", author: "", image: "", mark: ""})
 
   const handleChange = (e) =>{
     const name = e.target.name
     const value = e.target.value
     setBook({...book, [name]: value})
-    
   }
 
-  const submitBook = () =>{
+  const {setShowForm, dispatch} = useContext(CatalogContext);
+
+
+  const submitBook = async () =>{
     if(!book.title || !book.image || !book.author)
       return alert('Faltan campos por rellenar');
 
-    book['id'] = uuidv4();
-    setBooks((books)=>{
-      return [...books, book];
-    })
+    const createdBook = await CatalogApi.createBook(book)
+    if(!createdBook){
+      return dispatch({type: 'CREATE', payload: null, statusOk: false})
+    }
 
-    setBook({title: "", author: "", image: "", mark: "-"});
+
+    book['_id'] = createdBook._id
 
     setShowForm(false)
+    dispatch({type: 'CREATE', payload: book, statusOk: true})
+    setBook({title: "", author: "", image: "", mark: "-"});
   }
 
   return (
@@ -167,6 +172,7 @@ const FormComponent = ({setShowForm, setBooks, books}) =>{
 }
 
 
+
 // WAYS TO PASS PROPS
 // 1) book = {_book} /at the same time. When accessing in the children component take into consideration that you are receving an object within an object
 // 2) title = {_book.title} author = {_book.author} img = {_book.img}
@@ -175,8 +181,10 @@ const FormComponent = ({setShowForm, setBooks, books}) =>{
 //We can add whatever we want to add in between the init and the end of the tag in each Component. To retrieve that information in the children, we just need to include the
 //reserved word 'children' in the params of the function.
 const Book = (bookProperties) =>{
-  return (
+  const {setDialogVisible, dispatch} = useContext(CatalogContext);
+  return <>
     <article className="border">
+    <i onClick={()=>{dispatch({type: "SET_DELETE", id: bookProperties._id}); setDialogVisible(true)}} className="pi pi-trash"></i>
       <div className="img">
         <Image src = {bookProperties.image}/>
       </div>
@@ -192,7 +200,7 @@ const Book = (bookProperties) =>{
       <Button onClick={()=>goToBuyPage(bookProperties.id)} label="Criticize" className="p-button-raised p-button-rounded p-button-success"/>
     </div>
     </article>
-  )
+  </>
 }
 
 //If we do not add the '{}' return is not explicitly neccessary
