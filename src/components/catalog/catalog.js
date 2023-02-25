@@ -203,6 +203,7 @@ const Book = (bookProperties) =>{
   </>
 }
 
+
 //If we do not add the '{}' return is not explicitly neccessary
 const Image = ({src}) => {
   return <img src={src} alt="" />
