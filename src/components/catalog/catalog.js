@@ -1,5 +1,6 @@
 //Importamos React 
 import React, { useState, useReducer, useEffect, useRef, useContext } from 'react';
+import { FileUpload } from 'primereact/fileupload';
 import './catalog.scss'
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -7,7 +8,7 @@ import {CatalogApi} from '../../services/api.service'
 import { Toast } from 'primereact/toast';
 import { ConfirmDialog } from 'primereact/confirmdialog'; // To use <ConfirmDialog> tag
 import { reducer } from './catalog.reducer';
-
+import axios from 'axios';
 
 //LIBRARY
 
@@ -21,14 +22,11 @@ const defaultState = {
 }
 
 const CatalogContext = React.createContext()
-
 const deleteBook = async (id) =>{
-  const deleted = await CatalogApi.deleteBook(id)
+  await CatalogApi.deleteBook(id)
   .catch((err)=>{
-    console.log(7, err);
+    console.error('Error deleting book', err);
   })
-  console.log(66, deleted);
-
 }
 
 export const Catalog = () =>{
@@ -71,9 +69,9 @@ export const Catalog = () =>{
         {showForm && <FormComponent/>}
         <div className="wrap">
           {
-            state.books  && state.books.map((_book)=>{
+            state.books.length  && state.books.map((_book)=>{
               return (
-                <Book key = {_book._id}  {..._book}/>
+                <Book key={_book.bookId}  {..._book}/>
               )
             })
           }
@@ -84,7 +82,7 @@ export const Catalog = () =>{
 
 
 const goToBuyPage = (id) => {
-  console.log(`Vamos a la pagina de compra del libro con id ${id}`);
+  console.info(`Vamos a la pagina de compra del libro con id ${id}`);
 }
 
 
@@ -103,7 +101,7 @@ const FormComponent = () =>{
 
 
   const submitBook = async () =>{
-    if(!book.title || !book.image || !book.author)
+    if(!book.title  || !book.author)
       return alert('Faltan campos por rellenar');
 
     const createdBook = await CatalogApi.createBook(book)
@@ -112,12 +110,13 @@ const FormComponent = () =>{
     }
 
 
-    book['_id'] = createdBook._id
-
+    book['bookId'] = createdBook.bookId
     setShowForm(false)
     dispatch({type: 'CREATE', payload: book, statusOk: true})
     setBook({title: "", author: "", image: "", mark: "-"});
+
   }
+
 
   return (
       <section className="p-d-grid form">
@@ -144,16 +143,6 @@ const FormComponent = () =>{
                 />
             </div>
             <div className="p-field">
-                <label htmlFor="image"><b>Image</b></label>
-                <InputText 
-                  id="image" 
-                  type="text" 
-                  name="image"
-                  value={book.image}
-                  onChange={handleChange}
-                />
-            </div>
-            <div className="p-field">
                 <label htmlFor="mark"><b>Mark</b></label>
                 <InputText 
                   id="mark" 
@@ -171,6 +160,9 @@ const FormComponent = () =>{
   )
 }
 
+{/* <div className="p-field">
+
+</div> */}
 
 
 // WAYS TO PASS PROPS
@@ -181,10 +173,20 @@ const FormComponent = () =>{
 //We can add whatever we want to add in between the init and the end of the tag in each Component. To retrieve that information in the children, we just need to include the
 //reserved word 'children' in the params of the function.
 const Book = (bookProperties) =>{
+  const toast = useRef(Toast)
+
   const {setDialogVisible, dispatch} = useContext(CatalogContext);
+
+  const onSelect = async (e) => {
+    const formData = new FormData()
+    formData.append('photo', e.files[0])
+    await CatalogApi.saveImage(formData)
+    toast.current.show({ severity: 'info', summary: 'Success', detail: 'File Uploaded' });
+  };
+
   return <>
     <article className="border">
-    <i onClick={()=>{dispatch({type: "SET_DELETE", id: bookProperties._id}); setDialogVisible(true)}} className="pi pi-trash"></i>
+    <i onClick={()=>{dispatch({type: "SET_DELETE", id: bookProperties.bookId}); setDialogVisible(true)}} className="pi pi-trash"></i>
       <div className="img">
         <Image src = {bookProperties.image}/>
       </div>
@@ -197,7 +199,11 @@ const Book = (bookProperties) =>{
     {/* {bookProperties.children} */}
     <div className="btn">
        {/* Here we have to introduce the function into another arrow function to avoid calling it when rendering the application */}
-      <Button onClick={()=>goToBuyPage(bookProperties.id)} label="Criticize" className="p-button-raised p-button-rounded p-button-success"/>
+       {/* <label htmlFor="image"><b>Image</b></label> */}
+      <div className="card flex justify-content-center">
+        <FileUpload mode="basic" name="demo[]" url="/api/upload" accept="image/*" maxFileSize={1000000} onSelect={onSelect} />
+      </div>  
+      {/* <Button onClick={()=>goToBuyPage(bookProperties.id)} label="Criticize" className="p-button-raised p-button-rounded p-button-success"/> */}
     </div>
     </article>
   </>

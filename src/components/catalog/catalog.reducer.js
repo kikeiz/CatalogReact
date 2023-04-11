@@ -20,21 +20,26 @@
     if(action.error)
       return {...state,  action: 'deleted', statusOk: false, task: state.task ? false : true};
 
-    const newBooks = state.books.filter(x => x._id !== state.idToDelete)
+    const newBooks = state.books.filter(x => x.bookId !== state.idToDelete)
     return {...state, books: newBooks, action: 'deleted', statusOk: true, task: state.task ? false : true};
   }
   
   export const reducer = (state, action) =>{
-    console.log('llegamos');
-    const whatToReturn = {
-      "SET_DELETE": set_delete,
-      "DELETE": _delete,
-      "FIRST_OK": first,
-      "FITST_FAIL": first_fail,
-      "CREATE": create
+    if(action.type === "SET_DELETE"){
+      return set_delete(state, action)
     }
-  
-    console.log(55, whatToReturn[action.type](state, action));
-    return  whatToReturn[action.type](state, action)
+    if(action.type === "DELETE"){
+      return _delete(state, action)
+    }
+    
+    if(action.type === "FIRST_OK"){
+      return first(state, action)
+    }
+
+    if(action.type === "FITST_FAIL"){
+      return first_fail(state, action)
+    }
+
+    return create(state, action)
   }
   

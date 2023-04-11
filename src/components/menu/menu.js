@@ -23,8 +23,8 @@ const items = [
 
 export const Menu = () =>{
     return <>
-        <NavLink to="/catalog">Catalog</NavLink>
-        <NavLink to="/buypage">Buypage</NavLink>
+        {/* <NavLink to="/catalog">Catalog</NavLink>
+        <NavLink to="/buypage">Buypage</NavLink> */}
         {/* <Menubar model={items} end={<InputText placeholder="Search" type="text"/>}/> */}
     </>
 }

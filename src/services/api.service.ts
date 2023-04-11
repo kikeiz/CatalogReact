@@ -1,27 +1,36 @@
 const axios = require('axios')
 
-let back = 'http://localhost:3001/mproject'
+let back = 'http://localhost:3001'
 
 export class CatalogApi{
     
    public static retrieveBooks = async () =>{
-    const books = await axios.get(`${back}/catalog`)
-    
-    if(books.data.status !== 200 && books.data.status !== 404) 
+    const books = await axios.get(`${back}/catalog`)    
+    if(books.status !== 200 && books.status !== 404) 
         return []
 
-    return books.data.data
+    return books?.data?.data || []
    } 
 
-   public static createBook = async (book:any) =>{
-       
+   public static saveImage = async (formData: any) =>{    
+    const response = await axios.post(`${back}/catalog/image`, formData , {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+    })
+   
+
+    return response
+    
+   }
+   public static createBook = async (book:any) =>{       
     const createdBook = await axios.post(`${back}/catalog`, book)
     .catch((err:any)=>{
-        console.log(err);
+        console.error(err);
     })    
-    if(createdBook.data.status !== 200 && createdBook.data.status !== 404) 
+    if(createdBook.status !== 200 && createdBook.status !== 404) 
         return null
-
+    
     return createdBook.data.data
    } 
 
