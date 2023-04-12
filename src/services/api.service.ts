@@ -1,6 +1,6 @@
 const axios = require('axios')
 
-let back = 'http://localhost:3001'
+let back = 'http://ec2-16-170-133-84.eu-north-1.compute.amazonaws.com:3000'
 
 export class CatalogApi{
     
