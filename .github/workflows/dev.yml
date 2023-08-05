@@ -17,8 +17,7 @@ on:
 
 env:
   DEPLOY_ENV: ${{ github.event.inputs.environment || 'dev' }}
-  BUCKET_NAME: |
-    [[ ${{env.DEPLOY_ENV}} = 'dev' ]] && 'enriqueizquierdo.click' || 'enriqueizquierdo.click'
+  BUCKET_NAME: ${{[[ github.event.inputs.environment != 'prod' ]] && 'enriqueizquierdo.click' || 'enriqueizquierdo.click'}}
 
 jobs:
   build-and-replace-s3-content:
