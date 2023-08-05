@@ -60,4 +60,5 @@ jobs:
 
       - name: Replace S3 bucket content
         run: |
+          echo ${{ steps.get_bucket_name.outputs.bucket_name }}
           aws s3 sync ./build "s3://${{ steps.get_bucket_name.outputs.bucket_name }}"
