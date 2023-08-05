@@ -17,7 +17,7 @@ on:
 
 env:
   DEPLOY_ENV: ${{ github.event.inputs.environment || 'dev' }}
-  BUCKET_NAME: ${{[[ github.event.inputs.environment != 'prod' ]] && 'enriqueizquierdo.click' || 'enriqueizquierdo.click'}}
+  BUCKET_NAME: 'enriqueizquierdo.click'
 
 jobs:
   build-and-replace-s3-content:
@@ -50,16 +50,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Determine Bucket Name
-        id: get_bucket_name
-        run: |
-          if [[ ${{ env.DEPLOY_ENV }} == "dev" ]]; then
-            echo "enriqueizquierdo.click"
-          else
-            echo "enriqueizquierdo.click"
-          fi
-
       - name: Replace S3 bucket content
         run: |
           echo ${{ steps.get_bucket_name.outputs.bucket_name }}
-          aws s3 sync ./build "s3://${{ steps.get_bucket_name.outputs.bucket_name }}"
+          aws s3 sync ./build "s3://${{ env.BUCKET_NAME }}"
