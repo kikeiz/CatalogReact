@@ -1,23 +1,23 @@
-import { Menubar } from 'primereact/menubar';
-import { InputText } from 'primereact/inputtext';
-import { Link, NavLink } from 'react-router-dom';
+// import { Menubar } from 'primereact/menubar';
+// import { InputText } from 'primereact/inputtext';
+// import { NavLink } from 'react-router-dom';
 
 
 
-const items = [
-    {
-       label:'Buypage',
-       icon:'pi pi-fw pi-file',
-       to: '/buypage',
-       command: (event) => <NavLink to="/buypage"></NavLink>
-    },
-    {
-       label:'Catalog',
-       icon:'pi pi-fw pi-pencil',
-       to: '/catalog',
-       command: () => <NavLink to="/catalog"></NavLink>
-    },
-];
+// const items = [
+//     {
+//        label:'Buypage',
+//        icon:'pi pi-fw pi-file',
+//        to: '/buypage',
+//        command: (event) => <NavLink to="/buypage"></NavLink>
+//     },
+//     {
+//        label:'Catalog',
+//        icon:'pi pi-fw pi-pencil',
+//        to: '/catalog',
+//        command: () => <NavLink to="/catalog"></NavLink>
+//     },
+// ];
 
 
 

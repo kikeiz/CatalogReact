@@ -14,4 +14,4 @@ import {App} from './App'
 //Este método búsca dos cosas:
 // 1) Lo que vamos a renderizar
 // 2) Donde lo vamos a renderizar
-ReactDom.render(<App/>, document.getElementById('root'))
+ReactDom.render(<App/>, <p>FUNCIONANDO</p>)

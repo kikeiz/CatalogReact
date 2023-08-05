@@ -8,7 +8,7 @@ import {CatalogApi} from '../../services/api.service'
 import { Toast } from 'primereact/toast';
 import { ConfirmDialog } from 'primereact/confirmdialog'; // To use <ConfirmDialog> tag
 import { reducer } from './catalog.reducer';
-import axios from 'axios';
+// import axios from 'axios';
 
 //LIBRARY
 
@@ -57,7 +57,7 @@ export const Catalog = () =>{
       );
     }
     
-  }, [state.task])
+  }, [state.task, state.action, state.statusOk])
 
   return <CatalogContext.Provider value = {{setShowForm, dispatch, setDialogVisible}}>
       <ConfirmDialog visible={dialogVisible} onHide={() => setDialogVisible(false)} message="Are you sure you want to delete the book?" header="Confirmation" icon="pi pi-exclamation-triangle" accept={async ()=> {dispatch({type: "DELETE", payload: await deleteBook(state.idToDelete)}); setDialogVisible(false)}} reject={()=> setDialogVisible(false)} />
@@ -81,9 +81,9 @@ export const Catalog = () =>{
 }
 
 
-const goToBuyPage = (id) => {
-  console.info(`Vamos a la pagina de compra del libro con id ${id}`);
-}
+// const goToBuyPage = (id) => {
+//   console.info(`Vamos a la pagina de compra del libro con id ${id}`);
+// }
 
 
 
@@ -160,9 +160,6 @@ const FormComponent = () =>{
   )
 }
 
-{/* <div className="p-field">
-
-</div> */}
 
 
 // WAYS TO PASS PROPS
